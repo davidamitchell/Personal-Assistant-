@@ -46,6 +46,8 @@ Agents working on this repository are expected to actively improve the system ov
    - Preferences or constraints demonstrated by the owner's feedback
    - Procedures that worked well (or failed) and why
 
+   **Only write a memory when the fact is unequivocally verified** — not planned, hypothetical, or inferred. If in doubt, do not write.
+
 3. **Surface improvement opportunities.** If you notice a recurring problem, a missing abstraction, a gap in the test suite, or a way to make the system faster or cleaner, open a GitHub Issue describing it. Do not silently accept a poor status quo.
 
 4. **Update memories when the system changes.** If you change how the app works, update or supersede the relevant memory files so future agents start with accurate context.
@@ -183,11 +185,11 @@ research/           # Git submodule: davidamitchell/Research (markdown notes)
 ├── copilot-instructions.md  # Agent instructions (this file)
 ├── mcp.json                 # MCP servers for GitHub Copilot Agent
 ├── agents/                  # Custom agent definitions
+│   └── learnings.md         # Persistent RCA/FIX log (read at session open)
 ├── instructions/            # Reusable instruction files
 ├── skills/                  # Agent skills (submodule: davidamitchell/Skills, read-only)
 └── workflows/
-    ├── ci.yml               # Lint and test on every push/PR
-    └── sync-skills.yml      # Weekly auto-update of the skills submodule
+    └── ci.yml               # Lint and test on every push/PR
 
 requirements.txt      # Python runtime dependencies
 requirements-dev.txt  # Dev/CI tools (ruff, pytest)
@@ -238,7 +240,7 @@ After completing any task, scan every file you touched — and their neighbourin
 1. **Root cause analysis — minimum three levels of why.** Do not stop at the symptom.
 2. **Classify** using one of: `STRUCTURAL` · `SCOPE_LEAK` · `TRIGGER_AMBIGUITY` · `BEHAVIOR_VAGUENESS` · `MISSING_GOVERNANCE` · `STALE_REFERENCE` · `REDUNDANCY`
 3. **Fix the root cause.** If a pattern spans multiple files, create or update the governance artifact that prevents recurrence rather than patching each file individually.
-4. **Update `learnings.md`** — new findings get an `RCA-NNN` ID, applied fixes get a `FIX-NNN` ID. A finding moves to `RESOLVED` only when the preventive governance artefact is in place. Anything requiring a human design decision goes to **Open Questions**.
+4. **Update `learnings.md`** — new findings get an `RCA-NNN` ID, applied fixes get a `FIX-NNN` ID. A finding moves to `RESOLVED` only when the preventive governance artifact is in place. Anything requiring a human design decision goes to **Open Questions**.
 
 This instruction file is itself in scope. If you find a defect in `copilot-instructions.md` or in any agent file, fix it as part of the session.
 
@@ -276,7 +278,17 @@ Skills live in `.github/skills/` (read-only submodule from `davidamitchell/Skill
 1. Open the relevant `SKILL.md` inside `.github/skills/<skill-name>/`
 2. Follow the skill's process step by step as the agent
 
-Available skills include `swe`, `code-review`, `technical-writer`, `research`, and others. See `.github/skills/README.md` for the full list.
+Available skills include `swe`, `code-review`, `technical-writer`, `research`, `backlog-manager`, and others. See `.github/skills/README.md` for the full list.
+
+### Mandatory skill usage
+
+These skills are **required** for every relevant session — not optional:
+
+| When | Skill | What to do |
+|---|---|---|
+| Any development work (code changes) | `swe` | Open `.github/skills/swe/SKILL.md` and follow the process before writing code |
+| After any code change | `code-review` | Open `.github/skills/code-review/SKILL.md` and run a review before marking work complete |
+| Creating or updating tasks / tracking work | `backlog-manager` | Open `.github/skills/backlog-manager/SKILL.md` to log and prioritise work items |
 
 ---
 
