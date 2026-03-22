@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Research Assistant</title>
+  <link rel="stylesheet" href="/static/style.css" />
+  <!-- Apple Sign In SDK – only loaded when not in dev-bypass mode -->
+  <meta name="appleid-signin-client-id" id="apple-client-id" content="" />
+  <meta name="appleid-signin-scope" content="name email" />
+  <meta name="appleid-signin-redirect-uri" id="apple-redirect-uri" content="" />
+  <meta name="appleid-signin-use-popup" content="true" />
+</head>
+<body>
+
+  <!-- ── Login screen ──────────────────────────────────────────────── -->
+  <div id="login-screen" class="screen hidden">
+    <div class="login-card">
+      <h1>Research Assistant</h1>
+      <p class="subtitle">Sign in to access your research notes and tasks.</p>
+      <div id="appleid-signin"
+           class="signin-button"
+           data-color="black"
+           data-border="true"
+           data-type="sign in">
+        <!-- Apple JS SDK replaces this div with the button -->
+      </div>
+      <p id="login-error" class="error hidden"></p>
+    </div>
+  </div>
+
+  <!-- ── Main app ───────────────────────────────────────────────────── -->
+  <div id="app-screen" class="screen hidden">
+
+    <header class="app-header">
+      <span class="app-title">Research Assistant</span>
+      <nav class="tabs">
+        <button class="tab-btn active" data-tab="search">Search</button>
+        <button class="tab-btn" data-tab="issues">Issues</button>
+      </nav>
+      <div class="header-right">
+        <span id="user-name" class="user-name"></span>
+        <button id="logout-btn" class="btn-ghost">Sign out</button>
+      </div>
+    </header>
+
+    <!-- ── Search tab ─────────────────────────────────────────────── -->
+    <section id="tab-search" class="tab-panel">
+      <div class="search-bar-row">
+        <input id="search-input"
+               type="text"
+               class="search-input"
+               placeholder="Ask anything about your research…"
+               autocomplete="off" />
+        <button id="search-btn" class="btn-primary">Search</button>
+      </div>
+
+      <div id="index-banner" class="banner hidden">
+        <span id="index-message"></span>
+        <button id="rebuild-btn" class="btn-ghost btn-sm">Rebuild index</button>
+      </div>
+
+      <div id="search-results" class="results-list"></div>
+    </section>
+
+    <!-- ── Issues tab ────────────────────────────────────────────── -->
+    <section id="tab-issues" class="tab-panel hidden">
+      <div class="issues-toolbar">
+        <div class="filter-group">
+          <button class="filter-btn active" data-status="">All</button>
+          <button class="filter-btn" data-status="open">Open</button>
+          <button class="filter-btn" data-status="closed">Closed</button>
+        </div>
+        <button id="new-issue-btn" class="btn-primary">+ New issue</button>
+      </div>
+
+      <div id="issues-list" class="issues-list"></div>
+    </section>
+
+  </div>
+
+  <!-- ── Issue edit modal ──────────────────────────────────────────── -->
+  <div id="issue-modal" class="modal-overlay hidden" role="dialog" aria-modal="true" aria-labelledby="modal-title">
+    <div class="modal">
+      <h2 id="modal-title">New issue</h2>
+
+      <label class="field-label" for="modal-title-input">Title</label>
+      <input id="modal-title-input" type="text" class="field-input" placeholder="Short summary" />
+
+      <label class="field-label" for="modal-body-input">Body</label>
+      <textarea id="modal-body-input" class="field-textarea" rows="6" placeholder="Details (markdown supported)"></textarea>
+
+      <label class="field-label" for="modal-labels-input">Labels <span class="hint">(comma-separated)</span></label>
+      <input id="modal-labels-input" type="text" class="field-input" placeholder="research, question, todo" />
+
+      <label class="field-label">Status</label>
+      <div class="radio-group">
+        <label><input type="radio" name="modal-status" value="open" checked /> Open</label>
+        <label><input type="radio" name="modal-status" value="closed" /> Closed</label>
+      </div>
+
+      <p id="modal-error" class="error hidden"></p>
+
+      <div class="modal-actions">
+        <button id="modal-delete-btn" class="btn-danger hidden">Delete</button>
+        <div class="modal-actions-right">
+          <button id="modal-cancel-btn" class="btn-ghost">Cancel</button>
+          <button id="modal-save-btn" class="btn-primary">Save</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="/static/app.js"></script>
+  <script src="https://appleid.cdn-apple.com/appleauth/static/jsapi/appleid/1/en_US/appleid.auth.js"
+          async defer></script>
+</body>
+</html>
