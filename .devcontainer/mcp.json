@@ -1,0 +1,18 @@
+{
+  "mcpServers": {
+    "github": {
+      "type": "stdio",
+      "command": "gh",
+      "args": ["mcp", "serve"]
+    },
+    "filesystem": {
+      "type": "stdio",
+      "command": "npx",
+      "args": [
+        "-y",
+        "@modelcontextprotocol/server-filesystem",
+        "/workspaces/Personal-Assistant-"
+      ]
+    }
+  }
+}
