@@ -1,6 +1,6 @@
-# Research Assistant
+# Personal Assistant
 
-A private single-user research management web app.
+A private single-user research management and productivity web app.
 
 ## What it does
 
@@ -10,19 +10,45 @@ A private single-user research management web app.
 | **Issue tracker** | Create, edit, and close research tasks with labels and markdown bodies. Stored in a local SQLite database. |
 | **Apple Sign In** | Secure authentication via Sign In with Apple. Dev-bypass mode lets you skip auth during development with a single env-var. |
 | **Zero-build frontend** | Plain HTML, CSS, and JavaScript – no framework, no build step. |
-| **Codespaces-ready** | One command to set up, one command to run. Port 8000 opens automatically in the browser. |
+| **Codespaces-ready** | Fully configured devcontainer. Port 8000 opens automatically in the browser. |
 
 ## Quick start (GitHub Codespaces)
 
-1. Open this repo in a Codespace – the devcontainer will run `setup.sh` automatically.
-2. Start the app:
+### Automatic setup
+
+When you open this repo in a Codespace, `.devcontainer/install.sh` runs automatically.
+It sets up everything without interaction: submodules, Python dependencies, OpenCode, zsh with
+oh-my-zsh, shell aliases, and the database. When it finishes, it prints a first-run checklist.
+
+### First-time auth (run once after setup completes)
+
+These two steps are required the first time you start a new Codespace. After that, credentials
+are cached for the lifetime of the Codespace.
+
+**Step 1 — Authenticate GitHub CLI**
 
 ```bash
-source .venv/bin/activate
-DEV_AUTH_BYPASS=1 python run.py
+gh auth login
 ```
 
-3. Codespaces will prompt you to open port 8000 in the browser.
+Choose: GitHub.com → HTTPS → Authenticate with a web browser (or paste a token).
+
+**Step 2 — Authenticate OpenCode / Copilot**
+
+```bash
+opencode auth
+```
+
+Follow the prompts to connect your Copilot Pro+ account.
+
+### Start the app
+
+```bash
+run
+```
+
+This is a shell alias for `DEV_AUTH_BYPASS=1 python run.py`. Port 8000 opens automatically
+in the browser via the Codespaces forwarded-port URL.
 
 ## Quick start (local)
 
@@ -54,11 +80,12 @@ Copy `.env.example` to `.env` and adjust:
 .
 ├── app/                    Python backend (Flask)
 │   ├── __init__.py         Package documentation
-│   ├── main.py             Routes and app entry point
+│   ├── main.py             Routes (thin – delegates to modules)
 │   ├── auth.py             Apple Sign In + dev bypass
 │   ├── search.py           Semantic search engine
 │   ├── issues.py           Issue tracker (SQLite)
-│   └── db.py               Database initialisation
+│   ├── db.py               Database initialisation
+│   └── memory.py           Agent memory read/write/compact
 ├── static/                 Frontend (plain HTML/CSS/JS)
 │   ├── index.html          Single-page app shell
 │   ├── app.js              All frontend logic
@@ -68,10 +95,19 @@ Copy `.env.example` to `.env` and adjust:
 │   ├── search_chunks.json
 │   └── issues.db
 ├── research/               Git submodule – Research notes
-├── skills/                 Git submodule – Shared agent skills
 ├── .devcontainer/          GitHub Codespaces configuration
-├── setup.sh                Automated setup script
-├── requirements.txt        Python dependencies
+│   ├── devcontainer.json   Container definition (Python 3.12, Node LTS, gh CLI)
+│   ├── install.sh          Automated setup (runs on postCreate)
+│   └── mcp.json            MCP servers for Copilot CLI / OpenCode
+├── .github/
+│   ├── mcp.json            MCP servers for Copilot in VS Code/web
+│   └── skills/             Git submodule – Shared agent skills (read-only)
+├── .memory/                Agent memory store (committed Markdown files)
+├── AGENTS.md               Agent briefing – read this before writing code
+├── setup.sh                Legacy local setup helper
+├── requirements.txt        Python runtime dependencies
+├── requirements-dev.txt    Dev/CI tools (ruff, pytest)
+├── run.py                  Entry point
 └── .env.example            Environment variable template
 ```
 
@@ -105,4 +141,11 @@ To add a new feature:
 | Submodule | Repo | Purpose |
 |-----------|------|---------|
 | `research/` | [davidamitchell/Research](https://github.com/davidamitchell/Research) | Markdown research notes |
-| `skills/` | [davidamitchell/Skills](https://github.com/davidamitchell/Skills) | Shared agent skills |
+| `.github/skills/` | [davidamitchell/Skills](https://github.com/davidamitchell/Skills) | Shared agent skills (read-only) |
+
+In a Codespace, aliases handle submodule operations:
+
+```bash
+sub-init   # initialise unpopulated submodules
+sub-pull   # pull latest commits from all submodule remotes
+```
