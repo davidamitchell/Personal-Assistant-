@@ -8,7 +8,8 @@ For AI coding agents working on this repository.
 > 3. Never assume credentials or capabilities exist — STOP and ask if not listed in the credentials table.
 > 4. Keep routes thin: all business logic lives in the app module files, not in `app/main.py`.
 > 5. **Always read `.memory/` at the start of a task and write new insights back after completing it.**
-> 6. **Always look for ways to improve the system** — note gaps, patterns, and learnings in `.memory/` and propose improvements via issues or PRs.
+> 6. **Always read `.github/agents/learnings.md` at the start of a task** — check for OPEN findings relevant to the current context.
+> 7. **Always look for ways to improve the system** — record findings in `learnings.md` and push fixes at the root cause, not the symptom.
 
 ---
 
@@ -219,6 +220,52 @@ run.py                # Top-level entry point
 - Tests live in `tests/`; use `pytest`
 - Mock all network calls
 - **Bug fixes must start with a failing test.** Write the test first, confirm it fails, then fix and confirm it passes.
+
+---
+
+## Continuous Improvement
+
+This procedure runs on **every** agent session — not as an optional mode.
+
+### Session open
+
+Read `.github/agents/learnings.md` (create it from the schema below if absent). Check for any OPEN findings relevant to the current task context before writing a single line of code.
+
+### Session close
+
+After completing any task, scan every file you touched — and their neighbouring instruction, agent, or skill files — for defects. For each finding:
+
+1. **Root cause analysis — minimum three levels of why.** Do not stop at the symptom.
+2. **Classify** using one of: `STRUCTURAL` · `SCOPE_LEAK` · `TRIGGER_AMBIGUITY` · `BEHAVIOR_VAGUENESS` · `MISSING_GOVERNANCE` · `STALE_REFERENCE` · `REDUNDANCY`
+3. **Fix the root cause.** If a pattern spans multiple files, create or update the governance artifact that prevents recurrence rather than patching each file individually.
+4. **Update `learnings.md`** — new findings get an `RCA-NNN` ID, applied fixes get a `FIX-NNN` ID. A finding moves to `RESOLVED` only when the preventive governance artefact is in place. Anything requiring a human design decision goes to **Open Questions**.
+
+This instruction file is itself in scope. If you find a defect in `copilot-instructions.md` or in any agent file, fix it as part of the session.
+
+### `.github/agents/learnings.md` schema
+
+```markdown
+# Copilot Customisation Learnings
+
+## Persistent Findings
+
+| ID | Category | Root Cause | Scope | Status | First Seen | Last Seen |
+|----|----------|------------|-------|--------|------------|-----------|
+
+## Applied Fixes
+
+| ID | File | Change Summary | Root Cause ID | Date |
+|----|------|----------------|---------------|------|
+
+## Ecosystem Reference Updates
+
+| Date | Change | Source |
+|------|--------|--------|
+
+## Open Questions
+
+- (questions requiring human design decisions go here)
+```
 
 ---
 
