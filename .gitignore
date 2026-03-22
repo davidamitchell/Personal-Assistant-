@@ -6,6 +6,10 @@ data/*.db
 data/*.db-shm
 data/*.db-wal
 
+# ── Agent memory ──────────────────────────────────────────────────────────────
+# .memory/ files ARE tracked — they are the persistent memory store.
+# No exclusions here; all .md files under .memory/ should be committed.
+
 # Virtual environment
 .venv/
 

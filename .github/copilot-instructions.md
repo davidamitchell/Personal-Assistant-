@@ -7,6 +7,8 @@ For AI coding agents working on this repository.
 > 2. Never edit `.github/skills/` — it is a read-only submodule. All skill changes go to `davidamitchell/Skills`.
 > 3. Never assume credentials or capabilities exist — STOP and ask if not listed in the credentials table.
 > 4. Keep routes thin: all business logic lives in the app module files, not in `app/main.py`.
+> 5. **Always read `.memory/` at the start of a task and write new insights back after completing it.**
+> 6. **Always look for ways to improve the system** — note gaps, patterns, and learnings in `.memory/` and propose improvements via issues or PRs.
 
 ---
 
@@ -29,6 +31,105 @@ A private single-user personal assistant web app built with Flask. It provides:
 - **DO NOT introduce new external services or credentials without explicit owner approval.**
 - **`.github/skills/` is a read-only submodule.** Never edit files inside `.github/skills/`. All skill changes go to `davidamitchell/Skills` (open a PR there). Then advance the submodule pointer in this repo after the Skills PR merges.
 - **Keep routes thin.** Route handlers in `app/main.py` should delegate immediately to module functions — no business logic inline.
+
+---
+
+## Self-Improvement Mandate
+
+Agents working on this repository are expected to actively improve the system over time. This means:
+
+1. **Read memories first.** At the start of every task, call `app/memory.read_relevant(query)` (or browse `.memory/` directly) to surface relevant facts, preferences, and procedures learned from prior sessions.
+
+2. **Write insights back.** After completing a task, use `app/memory.write_memory(type, content, ...)` to record:
+   - New facts discovered about the codebase
+   - Preferences or constraints demonstrated by the owner's feedback
+   - Procedures that worked well (or failed) and why
+
+3. **Surface improvement opportunities.** If you notice a recurring problem, a missing abstraction, a gap in the test suite, or a way to make the system faster or cleaner, open a GitHub Issue describing it. Do not silently accept a poor status quo.
+
+4. **Update memories when the system changes.** If you change how the app works, update or supersede the relevant memory files so future agents start with accurate context.
+
+5. **Use memory to avoid repeating mistakes.** Before writing code, check whether a similar approach was tried and failed (look for `confidence < 0.5` entries with relevant tags).
+
+---
+
+## Agent Memory System (`.memory/`)
+
+The `.memory/` directory is the agent's persistent, human-readable knowledge store. It survives across sessions because the files are committed to the repository.
+
+### Directory layout
+
+```
+.memory/
+  facts/           # Stable facts about the codebase, architecture, and project
+  preferences/     # Owner/agent style preferences and constraints
+  procedures/      # Learned workflows: what to do and in what order
+  index.md         # Auto-maintained index; tracks interaction_count for compaction
+```
+
+### Memory file format
+
+Each file is a Markdown document with YAML front-matter:
+
+```markdown
+---
+id: mem_fact_001
+type: fact            # fact | preference | procedure
+confidence: 0.95      # 0.0–1.0  (below 0.3 + stale → deleted by compaction)
+created_at: YYYY-MM-DD
+last_updated: YYYY-MM-DD
+tags: [flask, routes]
+supersedes: null      # id of the entry this replaces, or null
+---
+
+One atomic statement here. Max ~200 tokens. No transcripts or code blobs.
+```
+
+### Using memory in code
+
+```python
+from app.memory import read_relevant, write_memory, compact, load_context_for_prompt
+
+# 1. Retrieve relevant context (returns ≤5 ranked entries)
+entries = read_relevant("flask authentication")
+
+# 2. Inject into prompt
+context_str = load_context_for_prompt("flask authentication")
+
+# 3. Write a new insight after completing a task
+write_memory(
+    memory_type="fact",
+    content="The /api/me route returns 401 when no session cookie is present.",
+    confidence=0.95,
+    tags=["api", "auth"],
+)
+
+# 4. Run compaction manually (normally triggered automatically every 20 writes)
+compact()
+```
+
+### Write rules
+
+| Condition | Action |
+|---|---|
+| Content is empty or > 1000 chars | Reject |
+| > 80% keyword overlap with existing entry, same or lower confidence | Reject (duplicate) |
+| > 80% keyword overlap, higher confidence or `supersedes` set | Update in place |
+| No similar entry exists | Create new file |
+
+### Retrieval ranking
+
+Score = `keyword_similarity × confidence × recency_factor`
+
+- `keyword_similarity` — Jaccard overlap between query tokens and memory body + tags
+- `confidence` — 0.0–1.0 from the file's front-matter
+- `recency_factor` — 1.0 today, decays to 0.5 over 2 years
+
+### Compaction
+
+Compaction runs automatically every 20 writes. It:
+1. Deletes entries with `confidence < 0.3` that haven't been updated in 30+ days
+2. Merges pairs of entries in the same subdirectory with > 80% keyword overlap (keeps the higher-confidence one)
 
 ---
 
@@ -59,6 +160,7 @@ app/
 ├── auth.py         # Apple Sign In verification + session helpers
 ├── db.py           # SQLite schema and connection helper
 ├── issues.py       # Issue CRUD operations
+├── memory.py       # Agent memory: read/write/compact .memory/ files
 └── search.py       # Semantic search over research notes
 
 static/
@@ -70,6 +172,12 @@ data/               # Runtime data (gitignored content; .gitkeep tracks the dir)
 
 research/           # Git submodule: davidamitchell/Research (markdown notes)
 
+.memory/            # Agent memory store (Markdown files, committed to repo)
+├── facts/          # Factual memories about the codebase
+├── preferences/    # Style and constraint preferences
+├── procedures/     # Learned workflows
+└── index.md        # Auto-maintained index
+
 .github/
 ├── copilot-instructions.md  # Agent instructions (this file)
 ├── mcp.json                 # MCP servers for GitHub Copilot Agent
@@ -80,10 +188,11 @@ research/           # Git submodule: davidamitchell/Research (markdown notes)
     ├── ci.yml               # Lint and test on every push/PR
     └── sync-skills.yml      # Weekly auto-update of the skills submodule
 
-requirements.txt    # Python runtime dependencies
-setup.sh            # One-command environment setup
-run.py              # Top-level entry point
-.env.example        # Template for local .env
+requirements.txt      # Python runtime dependencies
+requirements-dev.txt  # Dev/CI tools (ruff, pytest)
+setup.sh              # One-command environment setup
+run.py                # Top-level entry point
+.env.example          # Template for local .env
 ```
 
 ---
@@ -135,3 +244,4 @@ MCP server configuration is in `.github/mcp.json`. Available tools include:
 - `git` — read repo history and file contents
 - `filesystem` — read and write files directly
 - `github` — interact with GitHub APIs (issues, PRs, etc.)
+
