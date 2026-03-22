@@ -1,0 +1,40 @@
+{
+  // Base image: Microsoft's Python 3.12 devcontainer image.
+  // Includes git, GitHub CLI, and common Python tooling out of the box.
+  "name": "Research Assistant",
+  "image": "mcr.microsoft.com/devcontainers/python:3.12",
+
+  // Run setup.sh once after the container is created.
+  // This installs Python dependencies, initialises the database, and
+  // populates git submodules so the app is ready to run immediately.
+  "postCreateCommand": "bash setup.sh",
+
+  // Forward port 8000 and open it automatically in the browser.
+  // Only one port is needed – the Flask app serves both the API and the SPA.
+  "forwardPorts": [8000],
+  "portsAttributes": {
+    "8000": {
+      "label": "Research Assistant",
+      "onAutoForward": "openBrowser"
+    }
+  },
+
+  // VS Code extensions that make development easier.
+  "customizations": {
+    "vscode": {
+      "extensions": [
+        "ms-python.python",
+        "ms-python.vscode-pylance",
+        "ms-python.debugpy",
+        "eamodio.gitlens"
+      ],
+      "settings": {
+        "python.defaultInterpreterPath": "/usr/local/bin/python",
+        "editor.formatOnSave": true,
+        "[python]": {
+          "editor.defaultFormatter": "ms-python.python"
+        }
+      }
+    }
+  }
+}

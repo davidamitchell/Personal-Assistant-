@@ -1,0 +1,19 @@
+# Core web framework
+flask>=3.0.0
+
+# Load .env files into os.environ without code changes
+python-dotenv>=1.0.0
+
+# Semantic search: neural embeddings for markdown content
+# Uses all-MiniLM-L6-v2 by default (~80 MB model, downloaded on first run)
+sentence-transformers>=3.0.0
+
+# Numeric vector operations for similarity search
+numpy>=1.26.0
+
+# Apple Sign In: validate RS256-signed identity tokens from Apple
+PyJWT>=2.8.0
+cryptography>=42.0.0
+
+# Fetch Apple's JWKS public-key endpoint (cached after first call)
+requests>=2.31.0

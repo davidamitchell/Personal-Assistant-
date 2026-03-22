@@ -1,0 +1,8 @@
+# data/ – runtime data (gitignored except this file)
+#
+# search_embeddings.npy   float32 matrix of chunk embeddings
+# search_chunks.json      chunk metadata (path, heading, text)
+# issues.db               SQLite database for the issue tracker
+#
+# Regenerate with:   python3 -c "from app.search import build_index; build_index()"
+# Re-init DB with:   python3 -c "from app.db import init_db; init_db()"
