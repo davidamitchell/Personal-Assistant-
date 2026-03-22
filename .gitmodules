@@ -4,8 +4,8 @@
 	# Research notes – markdown files indexed for semantic search.
 	# Populate with: git submodule update --init research
 
-[submodule "skills"]
-	path = skills
+[submodule ".github/skills"]
+	path = .github/skills
 	url = https://github.com/davidamitchell/Skills
-	# Shared agent skills library.
-	# Populate with: git submodule update --init skills
+	# Shared agent skills library (read-only – never edit files inside here).
+	# Populate with: git submodule update --init .github/skills

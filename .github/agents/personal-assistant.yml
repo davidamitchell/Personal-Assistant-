@@ -1,0 +1,7 @@
+name: personal-assistant
+description: >
+  Default agent for the Personal-Assistant repository.
+  Follows the rules in `.github/copilot-instructions.md` and uses skills
+  from `.github/skills/` to complete tasks.
+
+instructions: .github/instructions/default.instructions.md
